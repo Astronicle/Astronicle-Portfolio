@@ -9,28 +9,35 @@ export function ShutdownScreen() {
     <AnimatePresence>
       {isShutdown && (
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.8 }}
-          className="fixed inset-0 z-[9998] bg-black flex flex-col items-center justify-center cursor-pointer"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          transition={{ duration: 0.7 }}
           onClick={() => setShutdown(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 9998, background: '#000',
+            display: 'flex', flexDirection: 'column', alignItems: 'center',
+            justifyContent: 'center', cursor: 'pointer',
+          }}
         >
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="text-center"
+            style={{ textAlign: 'center' }}
           >
-            <div className="text-6xl mb-6">🌌</div>
-            <h1 className="text-2xl font-bold text-white mb-2">
+            <div style={{ fontSize: 64, marginBottom: 24 }}>🌌</div>
+            <h1 style={{ color: '#fff', fontSize: 22, fontWeight: 700, margin: '0 0 8px' }}>
               Thank you for visiting Astronicle&apos;s Portfolio
             </h1>
-            <p className="text-white/40 text-sm mb-8">
-              Astronicle OS — Powered by curiosity and caffeine ☕
+            <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13, margin: '0 0 32px' }}>
+              Portfolio OS — Powered by curiosity and caffeine ☕
             </p>
-            <div className="inline-flex items-center gap-2 text-white/30 text-sm border border-white/10 px-4 py-2 rounded-full">
-              <span className="w-1.5 h-1.5 rounded-full bg-white/30 animate-pulse" />
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              color: 'rgba(255,255,255,0.25)', fontSize: 13,
+              border: '1px solid rgba(255,255,255,0.1)',
+              padding: '8px 20px', borderRadius: 999,
+            }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgba(255,255,255,0.3)', animation: 'pulse 2s infinite' }} />
               Click anywhere to restart
             </div>
           </motion.div>

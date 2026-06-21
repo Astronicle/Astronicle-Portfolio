@@ -1,282 +1,390 @@
 'use client';
-import { useState, useRef, useEffect, KeyboardEvent } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import React from 'react';
+import { useWindowStore } from '@/store/windowStore';
 
-interface TerminalLine {
-  type: 'input' | 'output' | 'error' | 'success' | 'ascii';
+interface Line {
+  type: 'input' | 'output' | 'error' | 'success' | 'ascii' | 'dim' | 'title' | 'subtitle';
   content: string;
 }
+
+const SPLASH: Array<{ text: string; type: Line['type'] }> = [
+  { text: '    _    ____ _____ ____   ___  _   _ ___ ____ _     _____', type: 'ascii' },
+  { text: '   / \\  / ___|_   _|  _ \\ / _ \\| \\ | |_ _/ ___| |   | ____|', type: 'ascii' },
+  { text: '  / _ \\ \\___ \\ | | | |_) | | | |  \\| || | |   | |   |  _|', type: 'ascii' },
+  { text: ' / ___ \\ ___) || | |  _ <| |_| | |\\  || | |___| |___| |___', type: 'ascii' },
+  { text: '/_/   \\_\\____/ |_| |_| \\_\\\\___/|_| \\_|___\\____|_____|_____|', type: 'ascii' },
+  { text: '', type: 'output' },
+  { text: '  Portfolio OS v2.0.26  —  Abdul Rehman, Software Developer', type: 'title' },
+  { text: '', type: 'output' },
+  { text: '  ────────────────────────────────────────────────────────', type: 'dim' },
+  { text: '', type: 'output' },
+  { text: '  You can also browse this portfolio graphically using', type: 'output' },
+  { text: '  the desktop environment behind this window.', type: 'output' },
+  { text: '', type: 'output' },
+  { text: '  Continue in terminal?', type: 'subtitle' },
+];
+
+const PROMPT_LINE = '  [ y ] Terminal mode      [ n ] Close & use desktop';
 
 const COMMANDS: Record<string, () => string[]> = {
   help: () => [
     '╔══════════════════════════════════════╗',
-    '║     Astronicle Portfolio OS - Help   ║',
+    '║   Astronicle Portfolio OS — Help     ║',
     '╚══════════════════════════════════════╝',
     '',
-    '  about         → About Astronicle',
-    '  projects      → List all projects',
-    '  skills        → View tech skills',
-    '  experience    → Work experience',
-    '  certifications→ AWS certifications',
-    '  contact       → Contact information',
-    '  resume        → View resume',
-    '  github        → Open GitHub profile',
-    '  linkedin      → Open LinkedIn',
-    '  leetcode      → Open LeetCode',
-    '  whoami        → Display user info',
-    '  history       → Command history',
-    '  clear         → Clear terminal',
-    '  easteregg     → ???',
+    '  about          → About me',
+    '  projects       → List all projects',
+    '  skills         → Tech skills',
+    '  experience     → Experience & education',
+    '  certifications → AWS certifications',
+    '  contact        → Contact info',
+    '  resume         → Open resume',
+    '  github         → Open GitHub',
+    '  linkedin       → Open LinkedIn',
+    '  leetcode       → Open LeetCode',
+    '  whoami         → Current user',
+    '  history        → Command history',
+    '  easteregg      → ???',
+    '  clear          → Clear terminal',
     '',
   ],
+
   about: () => [
-    '┌─────────────────────────────────────────┐',
-    '│              ASTRONICLE                 │',
-    '│         Software Developer              │',
-    '└─────────────────────────────────────────┘',
+    '┌──────────────────────────────────────────┐',
+    '│           ABDUL REHMAN                   │',
+    '│       Software Developer                 │',
+    '│       Lucknow, Uttar Pradesh             │',
+    '└──────────────────────────────────────────┘',
     '',
-    '  A passionate full-stack developer who',
-    '  builds things with Java, TypeScript,',
-    '  Spring Boot, React, and AWS.',
+    '  Results-driven developer building scalable apps,',
+    '  backend systems, and automation tools with Java,',
+    '  Python, JavaScript, and modern web technologies.',
     '',
-    '  Currently: Building cool stuff 🚀',
-    '  Location: Planet Earth 🌍',
-    '  Status: Open to opportunities ✅',
+    '  Education  : B.Tech IT — KIET, Ghaziabad (CGPA 9.13)',
+    '  Community  : Member @ FOSSCU-K',
+    '  Cloud      : 4x AWS Certified',
+    '  Email      : astronicle78@gmail.com',
+    '  GitHub     : github.com/Astronicle',
     '',
   ],
-  whoami: () => ['astronicle', ''],
+
+  whoami: () => [
+    'Abdul Rehman (astronicle)',
+    'B.Tech IT Student · Software Developer · 4x AWS Certified',
+    '',
+  ],
+
   projects: () => [
-    'Projects (4 total):',
+    'Projects (2):',
     '',
-    '  🔗 UrlShortee          → URL shortener with analytics',
-    '  ⚡ Barze               → Developer social platform',
-    '  💪 StygianMaxxer       → AI-powered fitness tracker',
-    '  🌙 Genshin Calculator  → Resource planning tool',
+    '  📝 Barze   — Notes Companion',
+    '     Cross-platform desktop note-taking app',
+    '     Stack: React, Electron, JavaScript, Vite, Tailwind',
+    '     github.com/Astronicle/barze',
     '',
-    'Tip: Open the Projects folder on the desktop for details.',
+    '  🤖 Kachina — Discord Utility & Automation Bot',
+    '     Feature-rich Discord bot, 10+ commands, AsyncIO scheduler',
+    '     Stack: Python, Flask, Discord.py, AsyncIO, Render',
+    '     github.com/Astronicle/kachina',
+    '',
+    '  Tip: Double-click Projects on desktop for full details.',
     '',
   ],
+
   skills: () => [
     'Technical Skills:',
     '',
-    '  Languages  : Java ████████ 92%',
-    '               TypeScript ███████ 88%',
-    '               JavaScript ████████ 90%',
-    '               SQL ██████ 82%',
+    '  Languages      : Java · Python · JavaScript · TypeScript · SQL',
     '',
-    '  Frontend   : React ████████ 90%',
-    '               Next.js ███████ 85%',
-    '               Tailwind ████████ 92%',
+    '  Frontend       : React · Next.js · Tailwind CSS · Electron · Vite',
     '',
-    '  Backend    : Spring Boot ████████ 88%',
-    '               REST APIs ████████ 90%',
-    '               PostgreSQL ██████ 82%',
+    '  Backend        : Spring Boot · Flask · REST APIs',
     '',
-    '  Cloud      : AWS ██████ 78%',
-    '               Docker ███████ 80%',
+    '  Cloud & DevOps : AWS · Docker · Kubernetes',
+    '',
+    '  Tools          : Git · GitHub · Postman · DBeaver',
     '',
   ],
+
   experience: () => [
-    'Experience Timeline:',
+    'Experience & Education:',
     '',
-    '  2021 → Learning Journey begins',
-    '  2022 → First personal projects',
-    '  2023 → Open source contributions',
-    '  2023 → AWS Cloud Practitioner certified',
-    '  2024 → AWS AI Practitioner certified',
-    '  2024 → 4+ production projects deployed',
-    '  Now  → Building the future 🚀',
+    '  🎓 2024–2028  B.Tech Information Technology',
+    '               KIET Group of Institutions, Ghaziabad',
+    '               CGPA: 9.13',
+    '',
+    '  🌍 2024–Now   Member @ FOSSCU-K',
+    '               Organized 10+ workshops for 100+ participants',
+    '               Open-source collaboration & community building',
+    '',
+    '  🚀 2025       Barze — Electron desktop note app (React/Vite)',
+    '  🤖 2025       Kachina — Discord automation bot (Python/Flask)',
+    '',
+    '  ☁️  2025–2026  4x AWS Certifications earned',
+    '',
+    '  🏫 2023       Class XII ISC — CMS Lucknow — 98.25%',
+    '  🏫 2021       Class X ICSE  — CMS Lucknow — 98.6%',
     '',
   ],
+
   certifications: () => [
-    'AWS Certifications:',
+    'AWS Certifications (4):',
     '',
-    '  ☁️  AWS Certified Cloud Practitioner    [Dec 2023]',
-    '  🤖  AWS Certified AI Practitioner       [Mar 2024]',
+    '  ☁️  Cloud Practitioner          Nov 2025  ✓  (Expires May 2029)',
+    '  🤖  AI Practitioner             Dec 2025  ✓  (Expires Dec 2028)',
+    '  ⚙️  CloudOps Engineer Assoc     May 2026  ✓  (Expires May 2029)',
+    '  📊  Data Engineer Assoc         May 2026  ✓  (Expires May 2029)',
     '',
-    '  In Progress:',
-    '  ⏳  AWS Developer Associate',
-    '  ⏳  AWS Solutions Architect Associate',
+    '  Issuer: Amazon Web Services (AWS)',
     '',
   ],
+
   contact: () => [
-    'Contact Information:',
+    'Contact:',
     '',
-    '  📧  Email    : astronicle@gmail.com',
-    '  🔵  LinkedIn : linkedin.com/in/astronicle',
-    '  🐙  GitHub   : github.com/astronicle',
-    '  🟠  LeetCode : leetcode.com/astronicle',
-    '',
-  ],
-  resume: () => [
-    'Opening Resume...',
-    'Tip: Double-click Resume.pdf on the desktop.',
+    '  📧  astronicle78@gmail.com',
+    '  🔵  linkedin.com/in/astronicle78',
+    '  🐙  github.com/Astronicle',
+    '  🟠  leetcode.com/astronicle',
+    '  📞  +91 6388470933',
     '',
   ],
+
+  resume: () => {
+    if (typeof window !== 'undefined') window.open('/resume.pdf', '_blank');
+    return [
+      'Opening resume... 📄',
+      'Or double-click Resume.pdf on the desktop.',
+      '',
+    ];
+  },
+
   github: () => {
-    if (typeof window !== 'undefined') window.open('https://github.com/astronicle', '_blank');
-    return ['Opening GitHub profile...', ''];
+    if (typeof window !== 'undefined') window.open('https://github.com/Astronicle', '_blank');
+    return ['Opening GitHub... 🐙', ''];
   },
+
   linkedin: () => {
-    if (typeof window !== 'undefined') window.open('https://linkedin.com/in/astronicle', '_blank');
-    return ['Opening LinkedIn profile...', ''];
+    if (typeof window !== 'undefined') window.open('https://linkedin.com/in/astronicle78', '_blank');
+    return ['Opening LinkedIn... 🔵', ''];
   },
+
   leetcode: () => {
     if (typeof window !== 'undefined') window.open('https://leetcode.com/astronicle', '_blank');
-    return ['Opening LeetCode profile...', '200+ problems solved 💪', ''];
+    return ['Opening LeetCode... 🟠', ''];
   },
+
   easteregg: () => [
-    '🥚 You found an easter egg!',
+    '🥚 Easter egg found!',
     '',
-    '  Try these secret commands:',
-    '  → "sudo hire astronicle"',
-    '  → Konami code on the desktop (↑↑↓↓←→←→BA)',
-    '  → Click the clock 10 times',
+    '  Try these secrets:',
+    '  → Type "sudo hire astronicle"',
+    '  → Konami code on desktop (↑↑↓↓←→←→BA)',
+    '  → Click the taskbar clock 10 times',
     '',
   ],
-  clear: () => [],
 };
 
+const COLOR_MAP: Record<Line['type'], string> = {
+  input:    '#ffffff',
+  output:   'rgba(200,210,220,0.78)',
+  error:    '#f87171',
+  success:  '#4ade80',
+  ascii:    '#818cf8',
+  dim:      'rgba(255,255,255,0.22)',
+  title:    'rgba(255,255,255,0.92)',
+  subtitle: 'rgba(255,255,255,0.6)',
+};
+
+type Phase = 'typing' | 'waiting' | 'active';
+
 export function Terminal() {
-  const [lines, setLines] = useState<TerminalLine[]>([
-    { type: 'ascii', content: '╔══════════════════════════════════════════════╗' },
-    { type: 'ascii', content: '║     Welcome to Astronicle Portfolio OS       ║' },
-    { type: 'ascii', content: '║           Type "help" to get started         ║' },
-    { type: 'ascii', content: '╚══════════════════════════════════════════════╝' },
-    { type: 'output', content: '' },
-  ]);
+  const closeWindow = useWindowStore((s) => s.closeWindow);
+
+  const [phase, setPhase] = useState<Phase>('typing');
+  const [splashDone, setSplashDone] = useState<Array<{ text: string; type: Line['type'] }>>([]);
+  const [showPrompt, setShowPrompt] = useState(false);
+
+  const [lines, setLines] = useState<Line[]>([]);
   const [input, setInput] = useState('');
   const [history, setHistory] = useState<string[]>([]);
-  const [historyIndex, setHistoryIndex] = useState(-1);
+  const [histIdx, setHistIdx] = useState(-1);
+
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [lines]);
+  }, [splashDone, showPrompt, lines]);
 
   useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
+    if (phase === 'active') inputRef.current?.focus();
+  }, [phase]);
 
-  const processCommand = (cmd: string) => {
-    const trimmed = cmd.trim().toLowerCase();
-    const newHistory = [...history, cmd.trim()];
-    setHistory(newHistory);
-    setHistoryIndex(-1);
+  // Typewriter
+  useEffect(() => {
+    if (phase !== 'typing') return;
+    let idx = 0;
+    const tick = () => {
+      if (idx >= SPLASH.length) {
+        setShowPrompt(true);
+        setPhase('waiting');
+        return;
+      }
+      const item = SPLASH[idx];
+      setSplashDone(prev => [...prev, item]);
+      idx++;
+      setTimeout(tick, item.text === '' ? 55 : 22);
+    };
+    const t = setTimeout(tick, 200);
+    return () => clearTimeout(t);
+  }, [phase]);
 
-    const inputLine: TerminalLine = { type: 'input', content: cmd };
+  // y/n handler
+  useEffect(() => {
+    if (phase !== 'waiting') return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'y' || e.key === 'Y' || e.key === 'Enter') {
+        setShowPrompt(false);
+        setPhase('active');
+        setLines([
+          { type: 'output', content: '' },
+          { type: 'dim',    content: '  Type "help" to see available commands.' },
+          { type: 'output', content: '' },
+        ]);
+      } else if (e.key === 'n' || e.key === 'N') {
+        closeWindow('terminal');
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [phase, closeWindow]);
 
-    if (!trimmed) {
-      setLines((l) => [...l, inputLine, { type: 'output', content: '' }]);
-      return;
+  // Command runner
+  const run = useCallback((cmd: string) => {
+    const t = cmd.trim().toLowerCase();
+    const newHist = [...history, cmd.trim()];
+    setHistory(newHist);
+    setHistIdx(-1);
+    const inLine: Line = { type: 'input', content: cmd };
+
+    if (!t) { setLines(l => [...l, inLine, { type: 'output', content: '' }]); return; }
+
+    if (t === 'sudo hire astronicle') {
+      setLines(l => [...l, inLine,
+        { type: 'success', content: '🎉 EXCELLENT CHOICE!' },
+        { type: 'success', content: '   Contact: astronicle78@gmail.com' },
+        { type: 'success', content: '   LinkedIn: linkedin.com/in/astronicle78 🚀' },
+        { type: 'output',  content: '' },
+      ]); return;
     }
-
-    // Easter egg
-    if (trimmed === 'sudo hire astronicle') {
-      setLines((l) => [
-        ...l,
-        inputLine,
-        { type: 'success', content: '🎉 EXCELLENT CHOICE! Opening offer letter...' },
-        { type: 'success', content: '  You have excellent taste in developers.' },
-        { type: 'success', content: '  astronicle@gmail.com — drop a message! 🚀' },
+    if (t === 'history') {
+      setLines(l => [...l, inLine,
+        ...newHist.map((h, i) => ({ type: 'output' as const, content: `  ${i + 1}  ${h}` })),
         { type: 'output', content: '' },
-      ]);
-      return;
+      ]); return;
     }
+    if (t === 'clear') { setLines([]); return; }
 
-    if (trimmed === 'history') {
-      const historyLines: TerminalLine[] = [
-        inputLine,
-        ...newHistory.map((h, i) => ({
-          type: 'output' as const,
-          content: `  ${i + 1}  ${h}`,
-        })),
-        { type: 'output', content: '' },
-      ];
-      setLines((l) => [...l, ...historyLines]);
-      return;
-    }
-
-    if (trimmed === 'clear') {
-      setLines([]);
-      return;
-    }
-
-    const handler = COMMANDS[trimmed];
+    const handler = COMMANDS[t];
     if (handler) {
-      const output = handler();
-      const outputLines: TerminalLine[] = output.map((o) => ({ type: 'output' as const, content: o }));
-      setLines((l) => [...l, inputLine, ...outputLines]);
+      setLines(l => [...l, inLine, ...handler().map(o => ({ type: 'output' as const, content: o }))]);
     } else {
-      setLines((l) => [
-        ...l,
-        inputLine,
-        { type: 'error', content: `Command not found: "${trimmed}". Type "help" for available commands.` },
+      setLines(l => [...l, inLine,
+        { type: 'error',  content: `Command not found: "${t}". Type "help" for available commands.` },
         { type: 'output', content: '' },
       ]);
     }
-  };
+  }, [history]);
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      processCommand(input);
-      setInput('');
-    } else if (e.key === 'ArrowUp') {
+  const handleKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') { run(input); setInput(''); }
+    else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      const newIndex = Math.min(historyIndex + 1, history.length - 1);
-      setHistoryIndex(newIndex);
-      setInput(history[history.length - 1 - newIndex] || '');
+      const ni = Math.min(histIdx + 1, history.length - 1);
+      setHistIdx(ni);
+      setInput(history[history.length - 1 - ni] || '');
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
-      const newIndex = Math.max(historyIndex - 1, -1);
-      setHistoryIndex(newIndex);
-      setInput(newIndex === -1 ? '' : history[history.length - 1 - newIndex] || '');
+      const ni = Math.max(histIdx - 1, -1);
+      setHistIdx(ni);
+      setInput(ni === -1 ? '' : history[history.length - 1 - ni] || '');
     }
   };
 
+  const base: React.CSSProperties = {
+    height: '100%', display: 'flex', flexDirection: 'column',
+    background: '#0d1117',
+    fontFamily: "'Cascadia Code', 'Fira Code', 'Consolas', monospace",
+    fontSize: 13, lineHeight: 1.6,
+  };
+
+  const scroll: React.CSSProperties = {
+    flex: 1, overflow: 'auto', padding: '20px 20px 12px',
+    display: 'flex', flexDirection: 'column', gap: 0,
+  };
+
+  if (phase !== 'active') {
+    return (
+      <div style={base}>
+        <div style={scroll}>
+          {splashDone.map((item, i) => (
+            <div key={i} style={{
+              color: COLOR_MAP[item.type],
+              whiteSpace: 'pre',
+              fontSize: item.type === 'ascii' ? 12 : 13,
+              marginBottom: item.text === '' ? 4 : 0,
+              fontWeight: item.type === 'title' ? 600 : 400,
+              letterSpacing: item.type === 'ascii' ? '0.02em' : 'normal',
+            }}>
+              {item.text || '\u00A0'}
+            </div>
+          ))}
+          {showPrompt && (
+            <div style={{ marginTop: 8 }}>
+              <div style={{ color: '#facc15', whiteSpace: 'pre', fontWeight: 600, letterSpacing: '0.02em' }}>
+                {PROMPT_LINE}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
+                <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11 }}>press key</span>
+                <span style={{ display: 'inline-block', width: 7, height: 14, background: '#facc15', borderRadius: 1, boxShadow: '0 0 6px rgba(250,204,21,0.6)' }} />
+              </div>
+            </div>
+          )}
+          <div ref={bottomRef} />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div
-      className="h-full flex flex-col bg-[#0d1117] text-green-400 font-mono text-sm"
-      onClick={() => inputRef.current?.focus()}
-    >
-      <div className="flex-1 overflow-auto p-4 space-y-0.5">
+    <div onClick={() => inputRef.current?.focus()} style={{ ...base, cursor: 'text' }}>
+      <div style={scroll}>
         {lines.map((line, i) => (
-          <div
-            key={i}
-            className={
-              line.type === 'input' ? 'text-white' :
-              line.type === 'error' ? 'text-red-400' :
-              line.type === 'success' ? 'text-yellow-400' :
-              line.type === 'ascii' ? 'text-indigo-400' :
-              'text-green-400/80'
-            }
-          >
-            {line.type === 'input' && (
+          <div key={i} style={{ color: COLOR_MAP[line.type], whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+            {line.type === 'input' ? (
               <span>
-                <span className="text-indigo-400">astronicle</span>
-                <span className="text-white/40">@</span>
-                <span className="text-purple-400">portfolio</span>
-                <span className="text-white/40">:~$ </span>
-                <span className="text-white">{line.content}</span>
+                <span style={{ color: '#818cf8' }}>astronicle</span>
+                <span style={{ color: 'rgba(255,255,255,0.3)' }}>@</span>
+                <span style={{ color: '#a855f7' }}>portfolio</span>
+                <span style={{ color: 'rgba(255,255,255,0.3)' }}>:~$ </span>
+                <span style={{ color: '#fff' }}>{line.content}</span>
               </span>
-            )}
-            {line.type !== 'input' && (line.content || '\u00A0')}
+            ) : (line.content || '\u00A0')}
           </div>
         ))}
-
-        {/* Active input line */}
-        <div className="flex items-center">
-          <span className="text-indigo-400">astronicle</span>
-          <span className="text-white/40">@</span>
-          <span className="text-purple-400">portfolio</span>
-          <span className="text-white/40">:~$ </span>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <span style={{ color: '#818cf8' }}>astronicle</span>
+          <span style={{ color: 'rgba(255,255,255,0.3)' }}>@</span>
+          <span style={{ color: '#a855f7' }}>portfolio</span>
+          <span style={{ color: 'rgba(255,255,255,0.3)' }}>:~$ </span>
           <input
             ref={inputRef}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className="flex-1 bg-transparent outline-none text-white caret-green-400"
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={handleKey}
+            style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: '#fff', fontFamily: 'inherit', fontSize: 'inherit', caretColor: '#4ade80' }}
             spellCheck={false}
             autoComplete="off"
           />

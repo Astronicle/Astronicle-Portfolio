@@ -4,52 +4,48 @@ import { skills } from '@/data';
 
 export function SkillsExplorer() {
   return (
-    <div className="h-full overflow-auto p-6 text-white">
-      <div className="space-y-6">
-        {skills.map((category, ci) => (
-          <motion.div
-            key={category.category}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: ci * 0.1 }}
-          >
-            <div className="flex items-center gap-2 mb-3">
-              <span>{category.icon}</span>
-              <h2 className="text-xs font-semibold uppercase tracking-widest" style={{ color: category.color }}>
-                {category.category}
-              </h2>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              {category.skills.map((skill, si) => (
-                <motion.div
-                  key={skill.name}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: ci * 0.1 + si * 0.05 }}
-                  className="p-3 rounded-lg bg-white/[0.03] border border-white/[0.06] hover:border-white/20 transition-colors group"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-base">{skill.icon}</span>
-                      <span className="text-sm font-medium text-white/80">{skill.name}</span>
-                    </div>
-                    <span className="text-xs font-mono" style={{ color: category.color }}>{skill.level}%</span>
+    <div style={{ height: '100%', overflow: 'auto', padding: 24, color: '#fff', display: 'flex', flexDirection: 'column', gap: 28 }}>
+      {skills.map((cat, ci) => (
+        <motion.div key={cat.category} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: ci * 0.08 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+            <span style={{ fontSize: 16 }}>{cat.icon}</span>
+            <span style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.14em', color: cat.color }}>
+              {cat.category}
+            </span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            {cat.skills.map((skill, si) => (
+              <motion.div
+                key={skill.name}
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: ci * 0.08 + si * 0.04 }}
+                style={{
+                  padding: '12px 14px', borderRadius: 10,
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.07)',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                    <span style={{ fontSize: 16 }}>{skill.icon}</span>
+                    <span style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.82)' }}>{skill.name}</span>
                   </div>
-                  <div className="h-1 bg-white/[0.06] rounded-full overflow-hidden">
-                    <motion.div
-                      className="h-full rounded-full"
-                      style={{ background: `linear-gradient(90deg, ${category.color}aa, ${category.color})` }}
-                      initial={{ width: 0 }}
-                      animate={{ width: `${skill.level}%` }}
-                      transition={{ delay: ci * 0.1 + si * 0.05 + 0.2, duration: 0.8, ease: 'easeOut' }}
-                    />
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        ))}
-      </div>
+                  <span style={{ fontSize: 11, fontFamily: 'monospace', color: cat.color }}>{skill.level}%</span>
+                </div>
+                <div style={{ height: 3, background: 'rgba(255,255,255,0.07)', borderRadius: 2, overflow: 'hidden' }}>
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${skill.level}%` }}
+                    transition={{ delay: ci * 0.08 + si * 0.04 + 0.2, duration: 0.7, ease: 'easeOut' }}
+                    style={{ height: '100%', background: `linear-gradient(90deg, ${cat.color}88, ${cat.color})`, borderRadius: 2 }}
+                  />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      ))}
     </div>
   );
 }

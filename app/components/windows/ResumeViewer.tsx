@@ -1,117 +1,93 @@
 'use client';
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
 
 export function ResumeViewer() {
   const [zoom, setZoom] = useState(100);
+  const [pdfSupported, setPdfSupported] = useState(true);
 
-  const resumeContent = {
-    name: 'Astronicle',
-    title: 'Full-Stack Software Developer',
-    contact: ['astronicle@gmail.com', 'github.com/astronicle', 'linkedin.com/in/astronicle', 'leetcode.com/astronicle'],
-    summary: 'Self-driven full-stack developer specializing in Java/Spring Boot and TypeScript/React ecosystems. Proven ability to design, build, and deploy production-grade web applications from scratch. AWS certified with hands-on cloud experience.',
-    skills: {
-      'Languages': ['Java', 'TypeScript', 'JavaScript', 'SQL'],
-      'Frontend': ['React', 'Next.js', 'Tailwind CSS'],
-      'Backend': ['Spring Boot', 'REST APIs', 'PostgreSQL', 'Redis'],
-      'Cloud & Tools': ['AWS EC2/RDS/S3', 'Docker', 'Git', 'GitHub', 'Postman'],
-    },
-    projects: [
-      { name: 'UrlShortee', tech: 'Spring Boot, React, PostgreSQL, AWS', desc: 'High-performance URL shortener with analytics and QR codes' },
-      { name: 'Barze', tech: 'Next.js, TypeScript, PostgreSQL, Prisma', desc: 'Developer social platform for sharing code snippets' },
-      { name: 'StygianMaxxer', tech: 'React Native, Spring Boot, PostgreSQL', desc: 'AI-powered fitness tracker with progressive overload' },
-      { name: 'Genshin Calculator', tech: 'React, TypeScript, Zustand', desc: 'Game resource planning tool with 500+ farming routes' },
-    ],
-    certifications: [
-      'AWS Certified Cloud Practitioner — Dec 2023',
-      'AWS Certified AI Practitioner — Mar 2024',
-    ],
-  };
+  // Check if browser can render PDFs in iframes
+  useEffect(() => {
+    const ua = navigator.userAgent;
+    // Firefox and Chrome support inline PDFs; Safari is hit or miss
+    const isSafari = /^((?!chrome|android).)*safari/i.test(ua);
+    if (isSafari) setPdfSupported(false);
+  }, []);
+
+  const pdfUrl = '/resume.pdf';
 
   return (
-    <div className="h-full flex flex-col bg-[#1a1a1a] text-white">
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#1a1a1a' }}>
       {/* Toolbar */}
-      <div className="flex items-center gap-3 px-4 py-2 border-b border-white/[0.06] bg-[#141414]">
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => setZoom(Math.max(50, zoom - 10))}
-            className="px-2 py-1 text-xs rounded hover:bg-white/10 transition-colors"
-          >−</button>
-          <span className="text-xs text-white/50 w-12 text-center">{zoom}%</span>
-          <button
-            onClick={() => setZoom(Math.min(150, zoom + 10))}
-            className="px-2 py-1 text-xs rounded hover:bg-white/10 transition-colors"
-          >+</button>
-        </div>
-        <div className="h-4 w-px bg-white/10" />
-        <span className="text-xs text-white/40">Resume.pdf</span>
-        <button className="ml-auto text-xs px-3 py-1 rounded-lg bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500/30 transition-colors border border-indigo-500/30">
-          ↓ Download
-        </button>
-      </div>
-
-      {/* PDF Content */}
-      <div className="flex-1 overflow-auto bg-[#2a2a2a] flex justify-center py-8 px-4">
-        <motion.div
-          className="bg-white text-gray-900 shadow-2xl"
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 10,
+        padding: '8px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)',
+        background: '#111', flexShrink: 0,
+      }}>
+        {pdfSupported && (
+          <>
+            <button
+              onClick={() => setZoom(z => Math.max(60, z - 10))}
+              style={{ width: 28, height: 28, borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.06)', color: '#fff', cursor: 'pointer', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >−</button>
+            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, width: 44, textAlign: 'center', fontFamily: 'monospace' }}>{zoom}%</span>
+            <button
+              onClick={() => setZoom(z => Math.min(150, z + 10))}
+              style={{ width: 28, height: 28, borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.06)', color: '#fff', cursor: 'pointer', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >+</button>
+            <div style={{ width: 1, height: 18, background: 'rgba(255,255,255,0.1)' }} />
+          </>
+        )}
+        <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: 12 }}>Abdul_Rehman_resume.pdf</span>
+        <a
+          href={pdfUrl}
+          download="Abdul_Rehman_resume.pdf"
           style={{
-            width: `${(595 * zoom) / 100}px`,
-            minHeight: `${(842 * zoom) / 100}px`,
-            fontSize: `${zoom}%`,
-            padding: '48px',
-            transformOrigin: 'top center',
+            marginLeft: 'auto', padding: '6px 16px', borderRadius: 8,
+            border: '1px solid rgba(99,102,241,0.5)',
+            background: 'rgba(99,102,241,0.18)',
+            color: '#a5b4fc', fontSize: 12, fontWeight: 600,
+            cursor: 'pointer', textDecoration: 'none',
+            display: 'flex', alignItems: 'center', gap: 6,
           }}
         >
-          {/* Header */}
-          <div className="border-b-2 border-gray-800 pb-4 mb-6">
-            <h1 className="text-3xl font-bold tracking-tight">{resumeContent.name}</h1>
-            <p className="text-lg text-gray-600 mt-1">{resumeContent.title}</p>
-            <div className="flex flex-wrap gap-3 mt-2 text-xs text-gray-500">
-              {resumeContent.contact.map((c) => (
-                <span key={c}>{c}</span>
-              ))}
-            </div>
-          </div>
+          ↓ Download PDF
+        </a>
+      </div>
 
-          {/* Summary */}
-          <div className="mb-5">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Summary</h2>
-            <p className="text-sm leading-relaxed text-gray-700">{resumeContent.summary}</p>
+      {/* PDF Viewer */}
+      <div style={{ flex: 1, overflow: 'auto', background: '#2a2a2a', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px 16px', gap: 16 }}>
+        {pdfSupported ? (
+          <iframe
+            src={`${pdfUrl}#zoom=${zoom}`}
+            style={{
+              width: `${Math.min(100, zoom)}%`,
+              maxWidth: 860,
+              minWidth: 480,
+              height: `${Math.max(700, zoom * 9)}px`,
+              border: 'none',
+              borderRadius: 4,
+              boxShadow: '0 8px 48px rgba(0,0,0,0.6)',
+              background: '#fff',
+            }}
+            title="Resume PDF"
+          />
+        ) : (
+          /* Fallback for Safari */
+          <div style={{ textAlign: 'center', padding: 40 }}>
+            <div style={{ fontSize: 48, marginBottom: 16 }}>📄</div>
+            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14, marginBottom: 24 }}>
+              Your browser doesn&apos;t support inline PDF viewing.
+            </p>
+            <a
+              href={pdfUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ padding: '10px 24px', borderRadius: 10, background: 'rgba(99,102,241,0.25)', border: '1px solid rgba(99,102,241,0.5)', color: '#a5b4fc', textDecoration: 'none', fontSize: 14 }}
+            >
+              Open PDF in new tab ↗
+            </a>
           </div>
-
-          {/* Skills */}
-          <div className="mb-5">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Technical Skills</h2>
-            {Object.entries(resumeContent.skills).map(([cat, items]) => (
-              <div key={cat} className="flex gap-2 text-sm mb-1">
-                <span className="font-semibold text-gray-700 w-28 flex-shrink-0">{cat}:</span>
-                <span className="text-gray-600">{items.join(', ')}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Projects */}
-          <div className="mb-5">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Projects</h2>
-            {resumeContent.projects.map((p) => (
-              <div key={p.name} className="mb-3">
-                <div className="flex items-baseline gap-2">
-                  <span className="font-semibold text-gray-800">{p.name}</span>
-                  <span className="text-xs text-gray-400">| {p.tech}</span>
-                </div>
-                <p className="text-sm text-gray-600 mt-0.5">• {p.desc}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Certifications */}
-          <div>
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Certifications</h2>
-            {resumeContent.certifications.map((cert) => (
-              <p key={cert} className="text-sm text-gray-700">• {cert}</p>
-            ))}
-          </div>
-        </motion.div>
+        )}
       </div>
     </div>
   );

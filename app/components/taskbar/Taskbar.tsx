@@ -24,170 +24,190 @@ export function Taskbar() {
   }, []);
 
   const handleClockClick = () => {
-    const newCount = clockClicks + 1;
-    setClockClicks(newCount);
-    if (newCount >= 10) {
+    const n = clockClicks + 1;
+    setClockClicks(n);
+    if (n >= 10) {
       setClockClicks(0);
-      alert('🎉 Easter Egg! You found the clock secret! Time is just a construct anyway... ⏰✨');
+      alert('🎉 Easter Egg found! You clicked the clock 10 times!\nTime is just a construct anyway... ⏰✨');
     }
   };
 
-  const startMenuItems = [
-    { icon: '👨‍💻', label: 'About Me', action: () => { openWindow('about', 'About Me', '👨‍💻', 'AboutWindow'); setShowStart(false); } },
-    { icon: '📁', label: 'Projects', action: () => { openWindow('projects', 'Projects', '📁', 'ProjectsExplorer'); setShowStart(false); } },
-    { icon: '💻', label: 'Skills', action: () => { openWindow('skills', 'Skills', '📁', 'SkillsExplorer'); setShowStart(false); } },
-    { icon: '📋', label: 'Experience', action: () => { openWindow('experience', 'Experience', '📁', 'ExperienceExplorer'); setShowStart(false); } },
-    { icon: '🏆', label: 'Certifications', action: () => { openWindow('certifications', 'Certifications', '📁', 'CertificationsExplorer'); setShowStart(false); } },
-    { icon: '📄', label: 'Resume', action: () => { openWindow('resume', 'Resume.pdf', '📄', 'ResumeViewer'); setShowStart(false); } },
-    { icon: '🖥️', label: 'Terminal', action: () => { openWindow('terminal', 'Terminal', '💻', 'Terminal'); setShowStart(false); } },
-    { icon: '⚙️', label: 'Settings', action: () => { openWindow('settings', 'Settings', '⚙️', 'SettingsWindow'); setShowStart(false); } },
-    { icon: '📬', label: 'Contact', action: () => { openWindow('contact', 'Contact', '📁', 'ContactExplorer'); setShowStart(false); } },
-    { icon: '🔴', label: 'Shut Down', action: () => { setShutdown(true); setShowStart(false); } },
+  const open = (id: any, title: string, icon: string, comp: string) => {
+    openWindow(id, title, icon, comp);
+    setShowStart(false);
+  };
+
+  const startItems = [
+    { icon: '👨‍💻', label: 'About Me',       action: () => open('about',          'About Me',       '👨‍💻', 'AboutWindow') },
+    { icon: '📁',   label: 'Projects',       action: () => open('projects',       'Projects',       '📁', 'ProjectsExplorer') },
+    { icon: '💡',   label: 'Skills',         action: () => open('skills',         'Skills',         '📁', 'SkillsExplorer') },
+    { icon: '📋',   label: 'Experience',     action: () => open('experience',     'Experience',     '📁', 'ExperienceExplorer') },
+    { icon: '🎓',   label: 'Education',      action: () => open('education',      'Education',      '📁', 'EducationExplorer') },
+    { icon: '🏆',   label: 'Certifications', action: () => open('certifications', 'Certifications', '📁', 'CertificationsExplorer') },
+    { icon: '📄',   label: 'Resume',         action: () => open('resume',         'Resume.pdf',     '📄', 'ResumeViewer') },
+    { icon: '💻',   label: 'Terminal',       action: () => open('terminal',       'Terminal',       '💻', 'Terminal') },
+    { icon: '⚙️',   label: 'Settings',       action: () => open('settings',       'Settings',       '⚙️', 'SettingsWindow') },
+    { icon: '📬',   label: 'Contact',        action: () => open('contact',        'Contact',        '📁', 'ContactExplorer') },
   ];
 
-  const openWindows = windows.filter((w) => !w.isMinimized || true);
+  // Pinned shortcuts with real actions
+  const pinnedItems = [
+    { icon: '📁', label: 'Projects', action: () => open('projects', 'Projects', '📁', 'ProjectsExplorer') },
+    { icon: '💻', label: 'Terminal', action: () => open('terminal', 'Terminal', '💻', 'Terminal') },
+    { icon: '⚙️', label: 'Settings', action: () => open('settings', 'Settings', '⚙️', 'SettingsWindow') },
+  ];
+
+  const BAR: React.CSSProperties = {
+    position: 'fixed', bottom: 0, left: 0, right: 0, height: 48,
+    display: 'flex', alignItems: 'center', padding: '0 8px', gap: 4,
+    background: 'rgba(8,8,10,0.94)',
+    backdropFilter: 'blur(20px)',
+    borderTop: '1px solid rgba(255,255,255,0.07)',
+    zIndex: 997,
+  };
 
   return (
     <>
+      {/* Backdrop */}
+      <AnimatePresence>
+        {showStart && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={() => setShowStart(false)}
+            style={{ position: 'fixed', inset: 0, zIndex: 996 }}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Start menu */}
       <AnimatePresence>
         {showStart && (
-          <>
-            <motion.div
-              className="fixed inset-0 z-[998]"
-              onClick={() => setShowStart(false)}
-            />
-            <motion.div
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 20, scale: 0.95 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-              className="fixed bottom-14 left-3 z-[999] w-72 rounded-2xl overflow-hidden"
-              style={{
-                background: 'rgba(18,18,18,0.95)',
-                backdropFilter: 'blur(24px)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                boxShadow: '0 24px 80px rgba(0,0,0,0.8)',
-              }}
-            >
-              {/* Header */}
-              <div className="px-5 py-4 border-b border-white/[0.06]">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xl">
-                    🚀
-                  </div>
-                  <div>
-                    <p className="text-white font-semibold text-sm">Astronicle</p>
-                    <p className="text-white/40 text-xs">Portfolio OS</p>
-                  </div>
-                </div>
+          <motion.div
+            initial={{ opacity: 0, y: 16, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 16, scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+            style={{
+              position: 'fixed', bottom: 56, left: 8, zIndex: 998,
+              width: 280, borderRadius: 16,
+              background: 'rgba(14,14,18,0.97)',
+              backdropFilter: 'blur(32px)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              boxShadow: '0 24px 80px rgba(0,0,0,0.8)',
+              overflow: 'hidden',
+            }}
+          >
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ width: 42, height: 42, borderRadius: 12, background: 'linear-gradient(135deg, #6366f1, #a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🚀</div>
+              <div>
+                <p style={{ color: '#fff', fontWeight: 600, fontSize: 14, margin: 0 }}>Abdul Rehman</p>
+                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, margin: 0 }}>Portfolio OS v2.0.26</p>
               </div>
-
-              {/* Items */}
-              <div className="p-2">
-                {startMenuItems.slice(0, -1).map((item) => (
-                  <button
-                    key={item.label}
-                    onClick={item.action}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[0.06] transition-colors text-left"
-                  >
-                    <span className="text-lg w-6 text-center">{item.icon}</span>
-                    <span className="text-sm text-white/80 font-medium">{item.label}</span>
-                  </button>
-                ))}
-              </div>
-
-              {/* Shutdown */}
-              <div className="p-2 border-t border-white/[0.06]">
-                <button
-                  onClick={startMenuItems[startMenuItems.length - 1].action}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-red-500/10 transition-colors text-left"
+            </div>
+            <div style={{ padding: 8 }}>
+              {startItems.map(item => (
+                <button key={item.label} onClick={item.action} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', borderRadius: 10, border: 'none', cursor: 'pointer', background: 'transparent', color: '#fff', fontSize: 13, fontWeight: 500, transition: 'background 0.15s', textAlign: 'left' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                 >
-                  <span className="text-lg w-6 text-center">🔴</span>
-                  <span className="text-sm text-red-400/80 font-medium">Shut Down</span>
+                  <span style={{ fontSize: 16, width: 22, textAlign: 'center' }}>{item.icon}</span>
+                  <span style={{ color: 'rgba(255,255,255,0.82)' }}>{item.label}</span>
                 </button>
-              </div>
-            </motion.div>
-          </>
+              ))}
+            </div>
+            <div style={{ padding: '8px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+              <button onClick={() => { setShutdown(true); setShowStart(false); }}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', borderRadius: 10, border: 'none', cursor: 'pointer', background: 'transparent', fontSize: 13, fontWeight: 500, textAlign: 'left', color: 'rgba(239,68,68,0.85)', transition: 'background 0.15s' }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(239,68,68,0.1)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+              >
+                <span style={{ fontSize: 16, width: 22, textAlign: 'center' }}>🔴</span>
+                Shut Down
+              </button>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
 
       {/* Taskbar */}
-      <div
-        className="fixed bottom-0 left-0 right-0 z-[997] h-12 flex items-center px-2 gap-1"
-        style={{
-          background: 'rgba(10,10,10,0.92)',
-          backdropFilter: 'blur(20px)',
-          borderTop: '1px solid rgba(255,255,255,0.06)',
-        }}
-      >
+      <div style={BAR}>
         {/* Start button */}
         <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setShowStart(!showStart)}
-          className={`w-9 h-9 rounded-lg flex items-center justify-center text-xl transition-all ${
-            showStart ? 'bg-white/15' : 'hover:bg-white/10'
-          }`}
-        >
-          🚀
-        </motion.button>
+          whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.93 }}
+          onClick={() => setShowStart(s => !s)}
+          style={{
+            width: 36, height: 36, borderRadius: 8, flexShrink: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 18, cursor: 'pointer', border: 'none',
+            background: showStart ? 'rgba(255,255,255,0.15)' : 'transparent',
+            color: '#fff',
+          }}
+        >🚀</motion.button>
 
         {/* Divider */}
-        <div className="w-px h-6 bg-white/10 mx-1" />
+        <div style={{ width: 1, height: 24, background: 'rgba(255,255,255,0.1)', margin: '0 4px', flexShrink: 0 }} />
 
-        {/* Pinned apps */}
-        {['📁', '💻', '⚙️'].map((icon, i) => (
+        {/* Pinned items — now functional */}
+        {pinnedItems.map((item) => (
           <motion.button
-            key={i}
+            key={item.label}
             whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            className="w-9 h-9 rounded-lg flex items-center justify-center text-xl hover:bg-white/10 transition-colors"
-          >
-            {icon}
-          </motion.button>
+            whileTap={{ scale: 0.92 }}
+            title={item.label}
+            onClick={item.action}
+            style={{
+              width: 36, height: 36, borderRadius: 8, flexShrink: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 18, cursor: 'pointer', border: 'none',
+              background: 'transparent', color: '#fff', transition: 'background 0.15s',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.08)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+          >{item.icon}</motion.button>
         ))}
 
-        <div className="w-px h-6 bg-white/10 mx-1" />
+        <div style={{ width: 1, height: 24, background: 'rgba(255,255,255,0.1)', margin: '0 4px', flexShrink: 0 }} />
 
         {/* Open windows */}
-        <div className="flex items-center gap-1 flex-1 overflow-x-auto">
-          {openWindows.map((win) => (
-            <motion.button
-              key={win.id}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              whileHover={{ scale: 1.03 }}
-              onClick={() => {
-                if (win.isMinimized) {
-                  restoreWindow(win.id);
-                } else if (win.isFocused) {
-                  minimizeWindow(win.id);
-                } else {
-                  focusWindow(win.id);
-                }
-              }}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs max-w-32 transition-all ${
-                win.isFocused && !win.isMinimized
-                  ? 'bg-white/15 text-white'
-                  : 'bg-white/[0.04] text-white/50 hover:bg-white/[0.08] hover:text-white/70'
-              }`}
-            >
-              <span>{win.icon}</span>
-              <span className="truncate">{win.title}</span>
-              {win.isMinimized && <span className="text-[8px] opacity-50">◼</span>}
-            </motion.button>
-          ))}
+        <div style={{ display: 'flex', gap: 3, flex: 1, overflow: 'hidden', alignItems: 'center' }}>
+          <AnimatePresence>
+            {windows.map(win => (
+              <motion.button
+                key={win.id}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.15 }}
+                onClick={() => {
+                  if (win.isMinimized) restoreWindow(win.id);
+                  else if (win.isFocused) minimizeWindow(win.id);
+                  else focusWindow(win.id);
+                }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  padding: '4px 10px', borderRadius: 7, border: 'none', cursor: 'pointer',
+                  maxWidth: 140, fontSize: 11, fontWeight: 500, whiteSpace: 'nowrap',
+                  overflow: 'hidden', transition: 'background 0.15s',
+                  background: win.isFocused && !win.isMinimized ? 'rgba(255,255,255,0.16)' : 'rgba(255,255,255,0.05)',
+                  color: win.isFocused && !win.isMinimized ? '#fff' : 'rgba(255,255,255,0.5)',
+                }}
+              >
+                <span style={{ fontSize: 13, flexShrink: 0 }}>{win.icon}</span>
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{win.title}</span>
+                {win.isMinimized && <span style={{ fontSize: 7, opacity: 0.5, flexShrink: 0 }}>▪</span>}
+              </motion.button>
+            ))}
+          </AnimatePresence>
         </div>
 
         {/* Clock */}
-        <button
-          onClick={handleClockClick}
-          className="flex flex-col items-end px-3 hover:bg-white/[0.05] rounded-lg py-1 transition-colors cursor-pointer"
+        <button onClick={handleClockClick}
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', padding: '4px 12px', borderRadius: 7, border: 'none', cursor: 'pointer', background: 'transparent', flexShrink: 0, transition: 'background 0.15s' }}
+          onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.06)')}
+          onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
         >
-          <span className="text-white text-xs font-medium font-mono">{time}</span>
-          <span className="text-white/40 text-[10px]">{date}</span>
+          <span style={{ color: '#fff', fontSize: 12, fontWeight: 500, fontFamily: 'monospace' }}>{time}</span>
+          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 10 }}>{date}</span>
         </button>
       </div>
     </>

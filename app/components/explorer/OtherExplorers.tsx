@@ -1,55 +1,82 @@
 'use client';
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { experiences, certifications, recycleItems } from '@/data';
 
 export function ExperienceExplorer() {
   return (
-    <div className="h-full overflow-auto p-6 text-white">
-      <div className="relative">
-        {/* Timeline line */}
-        <div className="absolute left-6 top-0 bottom-0 w-px bg-white/[0.06]" />
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', color: '#fff' }}>
+      {/* Address bar */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 6,
+        padding: '8px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)',
+        fontSize: 12, color: 'rgba(255,255,255,0.4)',
+      }}>
+        <span>📁</span><span>Desktop</span>
+        <span style={{ color: 'rgba(255,255,255,0.2)' }}>›</span>
+        <span style={{ color: 'rgba(255,255,255,0.7)' }}>Experience</span>
+        <span style={{ marginLeft: 'auto', color: 'rgba(255,255,255,0.3)' }}>{experiences.length} item{experiences.length !== 1 ? 's' : ''}</span>
+      </div>
 
-        <div className="space-y-6 pl-16">
-          {experiences.map((exp, i) => (
-            <motion.div
-              key={exp.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.12 }}
-              className="relative"
-            >
-              {/* Dot */}
-              <div
-                className="absolute -left-[42px] w-8 h-8 rounded-lg flex items-center justify-center text-base border"
-                style={{ background: `${exp.color}22`, borderColor: `${exp.color}44`, color: exp.color }}
-              >
+      <div style={{ flex: 1, overflow: 'auto', padding: 24 }}>
+        {experiences.map((exp, i) => (
+          <motion.div
+            key={exp.id}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1 }}
+            style={{
+              borderRadius: 14,
+              border: '1px solid rgba(255,255,255,0.08)',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Header */}
+            <div style={{
+              padding: '18px 20px 16px',
+              background: `linear-gradient(135deg, ${exp.color}20 0%, ${exp.color}08 100%)`,
+              borderBottom: '1px solid rgba(255,255,255,0.06)',
+              display: 'flex', alignItems: 'flex-start', gap: 16,
+            }}>
+              <div style={{
+                width: 52, height: 52, borderRadius: 14, flexShrink: 0,
+                background: `${exp.color}25`, border: `1px solid ${exp.color}50`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26,
+              }}>
                 {exp.icon}
               </div>
-
-              <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:border-white/20 transition-colors">
-                <div className="flex items-start justify-between gap-4 mb-2">
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
                   <div>
-                    <h3 className="font-semibold text-white">{exp.title}</h3>
-                    <p className="text-sm" style={{ color: exp.color }}>{exp.subtitle}</p>
+                    <h3 style={{ margin: '0 0 3px', fontSize: 15, fontWeight: 700 }}>{exp.title}</h3>
+                    <p style={{ margin: 0, fontSize: 13, color: exp.color, fontWeight: 500 }}>{exp.subtitle}</p>
                   </div>
-                  <span className="text-xs text-white/30 whitespace-nowrap font-mono">{exp.period}</span>
-                </div>
-                <p className="text-white/60 text-sm leading-relaxed mb-3">{exp.description}</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {exp.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="text-[10px] px-2 py-0.5 rounded"
-                      style={{ background: `${exp.color}15`, color: exp.color }}
-                    >
-                      {tag}
-                    </span>
-                  ))}
+                  <span style={{
+                    fontSize: 11, fontFamily: 'monospace', flexShrink: 0,
+                    color: 'rgba(255,255,255,0.3)', padding: '3px 8px', borderRadius: 6,
+                    background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
+                  }}>{exp.period}</span>
                 </div>
               </div>
-            </motion.div>
-          ))}
-        </div>
+            </div>
+
+            {/* Body */}
+            <div style={{ padding: '14px 20px', background: 'rgba(255,255,255,0.02)' }}>
+              <p style={{ margin: '0 0 12px', fontSize: 13, color: 'rgba(255,255,255,0.62)', lineHeight: 1.7 }}>
+                {exp.description}
+              </p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {exp.tags.map(tag => (
+                  <span key={tag} style={{
+                    fontSize: 11, padding: '3px 9px', borderRadius: 6,
+                    background: `${exp.color}15`, color: exp.color,
+                    border: `1px solid ${exp.color}35`,
+                  }}>{tag}</span>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        ))}
       </div>
     </div>
   );
@@ -57,56 +84,74 @@ export function ExperienceExplorer() {
 
 export function CertificationsExplorer() {
   return (
-    <div className="h-full overflow-auto p-6 text-white">
-      <div className="grid grid-cols-1 gap-4">
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', color: '#fff' }}>
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 6,
+        padding: '8px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)',
+        fontSize: 12, color: 'rgba(255,255,255,0.4)',
+      }}>
+        <span>📁</span><span>Desktop</span>
+        <span style={{ color: 'rgba(255,255,255,0.2)' }}>›</span>
+        <span style={{ color: 'rgba(255,255,255,0.7)' }}>Certifications</span>
+        <span style={{ marginLeft: 'auto', color: 'rgba(255,255,255,0.3)' }}>{certifications.length} items</span>
+      </div>
+
+      <div style={{ flex: 1, overflow: 'auto', padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
         {certifications.map((cert, i) => (
           <motion.div
             key={cert.id}
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.97 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: i * 0.1 }}
-            className="p-5 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:border-white/20 transition-all group"
+            transition={{ delay: i * 0.08 }}
+            style={{
+              borderRadius: 14, overflow: 'hidden',
+              border: '1px solid rgba(255,255,255,0.08)',
+            }}
           >
-            <div className="flex items-center gap-4">
-              <div
-                className="w-16 h-16 rounded-xl flex items-center justify-center text-3xl flex-shrink-0"
-                style={{ background: `${cert.badgeColor}22`, border: `1px solid ${cert.badgeColor}44` }}
-              >
-                {cert.icon}
+            {/* Header row */}
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 16, padding: '16px 20px',
+              background: `linear-gradient(135deg, ${cert.badgeColor}18 0%, ${cert.badgeColor}06 100%)`,
+              borderBottom: '1px solid rgba(255,255,255,0.06)',
+            }}>
+              <div style={{
+                width: 52, height: 52, borderRadius: 14, flexShrink: 0,
+                background: `${cert.badgeColor}22`, border: `1px solid ${cert.badgeColor}44`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26,
+              }}>{cert.icon}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <h3 style={{ margin: '0 0 4px', fontSize: 14, fontWeight: 700 }}>{cert.name}</h3>
+                <p style={{ margin: 0, fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>{cert.issuer}</p>
               </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-white">{cert.name}</h3>
-                <p className="text-sm text-white/50 mt-0.5">{cert.issuer}</p>
-                <div className="flex items-center gap-3 mt-2">
-                  <span className="text-xs font-mono" style={{ color: cert.badgeColor }}>
-                    Issued: {cert.date}
-                  </span>
-                  {cert.credentialUrl && (
-                    <a
-                      href={cert.credentialUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-white/30 hover:text-white/60 transition-colors"
-                    >
-                      Verify →
-                    </a>
-                  )}
-                </div>
+              <div style={{
+                padding: '5px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, flexShrink: 0,
+                background: `${cert.badgeColor}20`, color: cert.badgeColor,
+                border: `1px solid ${cert.badgeColor}40`,
+              }}>✓ Active</div>
+            </div>
+
+            {/* Details */}
+            <div style={{ padding: '12px 20px', background: 'rgba(255,255,255,0.02)', display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ display: 'flex', gap: 20, fontSize: 11 }}>
+                <span style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  Issued: <span style={{ color: cert.badgeColor, fontFamily: 'monospace', fontWeight: 600 }}>{cert.date}</span>
+                </span>
+                <span style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  Expires: <span style={{ color: 'rgba(255,255,255,0.55)', fontFamily: 'monospace' }}>{cert.expires}</span>
+                </span>
+                {cert.credentialUrl && (
+                  <a href={cert.credentialUrl} target="_blank" rel="noopener noreferrer"
+                    style={{ marginLeft: 'auto', color: 'rgba(255,255,255,0.3)', fontSize: 11, textDecoration: 'none' }}>
+                    Verify ↗
+                  </a>
+                )}
               </div>
-              <div
-                className="px-3 py-1.5 rounded-lg text-xs font-semibold"
-                style={{ background: `${cert.badgeColor}22`, color: cert.badgeColor }}
-              >
-                ✓ Active
-              </div>
+              <p style={{ margin: 0, fontSize: 12, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6 }}>
+                {cert.detail}
+              </p>
             </div>
           </motion.div>
         ))}
-      </div>
-
-      <div className="mt-6 p-4 rounded-xl bg-white/[0.02] border border-white/[0.04] text-center">
-        <p className="text-white/30 text-sm">More certifications in progress...</p>
-        <p className="text-white/20 text-xs mt-1">AWS Developer Associate • AWS Solutions Architect</p>
       </div>
     </div>
   );
@@ -114,48 +159,51 @@ export function CertificationsExplorer() {
 
 export function ContactExplorer() {
   const contacts = [
-    { icon: '📧', label: 'Email', value: 'astronicle@gmail.com', url: 'mailto:astronicle@gmail.com', color: '#ef4444' },
-    { icon: '🔵', label: 'LinkedIn', value: 'linkedin.com/in/astronicle', url: 'https://linkedin.com/in/astronicle', color: '#0077b5' },
-    { icon: '🐙', label: 'GitHub', value: 'github.com/astronicle', url: 'https://github.com/astronicle', color: '#6e40c9' },
+    { icon: '📧', label: 'Email', value: 'astronicle78@gmail.com', url: 'mailto:astronicle78@gmail.com', color: '#ef4444' },
+    { icon: '🔵', label: 'LinkedIn', value: 'linkedin.com/in/astronicle78', url: 'https://linkedin.com/in/astronicle78', color: '#0077b5' },
+    { icon: '🐙', label: 'GitHub', value: 'github.com/Astronicle', url: 'https://github.com/Astronicle', color: '#a855f7' },
     { icon: '🟠', label: 'LeetCode', value: 'leetcode.com/astronicle', url: 'https://leetcode.com/astronicle', color: '#ffa116' },
+    { icon: '📞', label: 'Phone', value: '+91 6388470933', url: 'tel:+916388470933', color: '#10b981' },
   ];
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="flex items-center gap-2 px-4 py-2 border-b border-white/[0.06] text-xs text-white/40">
-        <span>📁</span>
-        <span>Desktop</span>
-        <span className="text-white/20">›</span>
-        <span className="text-white/60">Contact</span>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', color: '#fff' }}>
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 6,
+        padding: '8px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)',
+        fontSize: 12, color: 'rgba(255,255,255,0.4)',
+      }}>
+        <span>📁</span><span>Desktop</span>
+        <span style={{ color: 'rgba(255,255,255,0.2)' }}>›</span>
+        <span style={{ color: 'rgba(255,255,255,0.7)' }}>Contact</span>
       </div>
-      <div className="flex-1 p-6 grid gap-3">
+      <div style={{ flex: 1, padding: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
         {contacts.map((c, i) => (
           <motion.a
-            key={c.label}
-            href={c.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.08 }}
-            className="flex items-center gap-4 p-4 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/20 transition-all group cursor-pointer"
+            key={c.label} href={c.url} target="_blank" rel="noopener noreferrer"
+            initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 14, padding: 14, borderRadius: 12,
+              background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
+              textDecoration: 'none', transition: 'all 0.2s',
+            }}
+            whileHover={{ backgroundColor: 'rgba(255,255,255,0.07)' } as never}
           >
-            <div
-              className="w-10 h-10 rounded-lg flex items-center justify-center text-xl"
-              style={{ background: `${c.color}22`, border: `1px solid ${c.color}33` }}
-            >
-              {c.icon}
-            </div>
+            <div style={{
+              width: 40, height: 40, borderRadius: 10, flexShrink: 0,
+              background: `${c.color}20`, border: `1px solid ${c.color}33`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18,
+            }}>{c.icon}</div>
             <div>
-              <p className="text-white/40 text-xs">{c.label}</p>
-              <p className="text-white font-medium text-sm">{c.value}</p>
+              <p style={{ margin: '0 0 2px', fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{c.label}</p>
+              <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: '#fff' }}>{c.value}</p>
             </div>
-            <div className="ml-auto text-white/20 group-hover:text-white/60 transition-colors text-sm">↗</div>
+            <span style={{ marginLeft: 'auto', fontSize: 16, color: 'rgba(255,255,255,0.2)' }}>↗</span>
           </motion.a>
         ))}
       </div>
-      <div className="px-4 py-3 border-t border-white/[0.06] text-white/30 text-xs text-center">
-        Double-click any contact to open
+      <div style={{ padding: '10px 16px', borderTop: '1px solid rgba(255,255,255,0.06)', fontSize: 11, color: 'rgba(255,255,255,0.28)', textAlign: 'center' }}>
+        Click any contact to open
       </div>
     </div>
   );
@@ -165,46 +213,47 @@ export function RecycleBinExplorer() {
   const [openItem, setOpenItem] = useState<string | null>(null);
 
   return (
-    <div className="h-full flex flex-col text-white">
-      <div className="flex items-center gap-2 px-4 py-2 border-b border-white/[0.06] text-xs text-white/40">
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', color: '#fff' }}>
+      <div style={{ padding: '8px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)', fontSize: 12, display: 'flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.4)' }}>
         <span>🗑️</span>
-        <span className="text-white/60">Recycle Bin</span>
-        <span className="ml-auto">{recycleItems.length} items</span>
+        <span style={{ color: 'rgba(255,255,255,0.7)' }}>Recycle Bin</span>
+        <span style={{ marginLeft: 'auto' }}>{recycleItems.length} items</span>
       </div>
-      <div className="flex-1 overflow-auto p-4 grid gap-2">
+      <div style={{ flex: 1, overflow: 'auto', padding: 14, display: 'flex', flexDirection: 'column', gap: 6 }}>
         {recycleItems.map((item, i) => (
-          <motion.div
-            key={item.id}
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: i * 0.07 }}
-          >
+          <motion.div key={item.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.06 }}>
             <div
-              className="flex items-center gap-3 p-3 rounded-lg bg-white/[0.02] border border-white/[0.04] hover:border-white/10 cursor-pointer transition-all"
               onDoubleClick={() => setOpenItem(openItem === item.id ? null : item.id)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px',
+                borderRadius: 9, cursor: 'pointer', transition: 'background 0.15s',
+                background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.06)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
             >
-              <span className="text-xl">{item.icon}</span>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm text-white/70 truncate">{item.name}</p>
-                <p className="text-xs text-white/30">Deleted: {item.deletedDate}</p>
+              <span style={{ fontSize: 20 }}>{item.icon}</span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ margin: '0 0 2px', fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>{item.name}</p>
+                <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>Deleted: {item.deletedDate}</p>
               </div>
-              <span className="text-white/20 text-xs">{openItem === item.id ? '▲' : '▼'}</span>
+              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)' }}>{openItem === item.id ? '▲' : '▼'}</span>
             </div>
-            {openItem === item.id && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                className="mx-2 p-4 bg-white/[0.03] border border-white/[0.06] rounded-b-lg text-sm text-white/60 leading-relaxed"
-              >
-                {item.message}
-              </motion.div>
-            )}
+            <AnimatePresence>
+              {openItem === item.id && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+                  style={{ overflow: 'hidden' }}
+                >
+                  <div style={{ margin: '0 6px', padding: '14px 16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderTop: 'none', borderRadius: '0 0 9px 9px', fontSize: 13, color: 'rgba(255,255,255,0.55)', lineHeight: 1.7 }}>
+                    {item.message}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         ))}
       </div>
     </div>
   );
 }
-
-// Must import useState at top of file
-import { useState } from 'react';
